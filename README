@@ -1,0 +1,11 @@
+Shp.JS is a JavaScript library used for reading and writing Shapefiles. More
+info to follow.  Library is in its infancy, and contains numerous bugs/missing
+features.
+
+Library currently only supports writing points; support for other geometries
+is in the works.  Reading support is also planned.
+
+Library utilizes the ESRI JavaScript API, though de-coupling of the library
+from the ESRI API is possible/planned.
+
+Stay tuned for further updates.
