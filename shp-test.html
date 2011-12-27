@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="en-US-x-Hixie">
+<head>
+	<meta charset="utf-8"/>
+	<title>Shapefile-JS demo</title>
+	
+	<script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.6"></script>
+	<!--<script src="http://code.jquery.com/jquery-latest.js"> </script>  -->
+	<script src="jquery-latest.js"> </script>
+	<script type="text/javascript" src="BlobBuilder.js"></script>
+	<script type="text/javascript" src="FileSaver.js"></script>
+	
+	<script type="text/javascript" src="jszip.js"></script>
+	<script type="text/javascript" src="jszip-deflate.js"></script>
+	
+	<script type="text/javascript" src="core.js"></script>
+	<script type="text/javascript" src="shp-writer.js"></script>
+	<script type="text/javascript" src="constants.js"></script>
+	<script type="text/javascript" src="base64util.js"></script>
+	<script type="text/javascript" src="shx-writer.js"></script>
+	<script type="text/javascript" src="dbf-writer.js"></script>
+	<script type="text/javascript" src="wkt-strings.js"></script>	
+</head>
+<body>
+	<button onclick="testShapefile();">Test Shapefile</button>
+
+	<script type="text/javascript">
+		var testData = new esri.tasks.FeatureSet({
+		  "displayFieldName" : "stop_name",
+		  "fieldAliases" : {
+			"stop_name" : "stop_name"
+		  },
+		  "geometryType" : "esriGeometryPoint",
+		  "spatialReference" : {
+			"wkid" : 102100
+		  },
+		  "fields" : [
+			{
+			  "name" : "stop_name",
+			  "type" : "esriFieldTypeString",
+			  "alias" : "stop_name",
+			  "length" : 254
+			}
+		  ],
+		  "features" : [
+			{
+			  "attributes" : {
+				"stop_name" : "Harkness Rapid Transit Station"
+			  },
+			  "geometry" : {
+				"x" : -10812790.798,
+				"y" : 6425952.9525000006
+			  }
+			},
+			{
+			  "attributes" : {
+				"stop_name" : "Osborne Rapid Transit Station"
+			  },
+			  "geometry" : {
+				"x" : -10813685.378900001,
+				"y" : 6424360.2399000004
+			  }
+			},
+			{
+			  "attributes" : {
+				"stop_name" : "Fort Rouge Rapid Transit Station"
+			  },
+			  "geometry" : {
+				"x" : -10814235.6315,
+				"y" : 6422418.7775000036
+			  }
+			}
+		  ]
+		});
+	
+		function testShapefile() {
+			var shpWriter = new ShpJS.ShpWriter();
+			console.debug('shpWriter: ', shpWriter);
+			shpWriter.write('foobar', testData);
+			shpWriter.save('test_shp.shp');
+			//shpWriter.printShpContents();
+		}
+	</script>
+</body>
+</html>
