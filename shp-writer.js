@@ -25,34 +25,48 @@
 		/**
 		 * Writes the features to a set of files (shp, shx, dbf, prj)
 		 * required to create a shapefile.  Compresses all the written
-		 * files to a zip file, and returns a reference of it to the user.
+		 * files to a zip file.  Once write is called, save can be called
+		 * to save the file to user's selected location.
 		 */
-		write: function(filename, features) {			
-			this._features = features;
+		write: function(featureSet) {			
+			this._features = featureSet;
+
 			
 			var len = this._features.features.length;
 						
-			// SHP buffer length depends on type of feature
-			var shpBufLen = 0;
+			// SHP buffer length depends on type of feature, but each
+			// shapefile has the 100 byte header
+			var shpBufLen = 100;
 			if (this._features.geometryType == 'esriGeometryPoint') {
 				this.shapeTypeCode = ShpJS.Constants.POINT_SHAPE_TYPE;
-				// 100 bytes for SHP header + 28 bytes per point
-				shpBufLen = 100 + len * 28;
+				// 28 bytes per point
+				shpBufLen += len * 28;
 			}
-			else if (this._features.geometryType == 'esriGeometryPolyline') {
-				this.shapeTypeCode = ShpJS.Constants.POLYLINE_SHAPE_TYPE;
-			
-				this._writePolylines();
-			}
-			else if (this._features.geometryType == 'esriGeometryPolygon') {
-				this.shapeTypeCode = ShpJS.Constants.POLYGON_SHAPE_TYPE;
+			else if (this._features.geometryType == 'esriGeometryPolyline' || this._features.geometryType == 'esriGeometryPolygon') {
+				// Polygons and Polylines are essentially written the same way
+				this.shapeTypeCode = this._features.geometryType == 'esriGeometryPolyline' ? ShpJS.Constants.POLYLINE_SHAPE_TYPE : ShpJS.Constants.POLYGON_SHAPE_TYPE;
+				var partName = this._features.geometryType == 'esriGeometryPolyline' ? 'paths' : 'rings';
 				
-				this._writePolygons();
+				// 8 bytes for record header + 44 bytes for record contents (per record)
+				shpBufLen += len * (8 + 44);
+
+				// Loop through all features
+				var g;
+				for (var i=0; i<len; i++) {
+					g = this._features.features[i].geometry;
+					
+					// 4 bytes per path (for path indices)
+					shpBufLen += 4*g[partName].length;
+					
+					// Loop through all the paths
+					for (var j=0; j<g[partName].length; j++) {
+						// 16 bytes per point in current path
+						shpBufLen += 16*g[partName][j].length;
+					}
+				}
 			}
 			else if (this._features.geometryType == 'esriGeometryMultipoint') {
 				this.shapeTypeCode = ShpJS.Constants.MULTIPOINT_SHAPE_TYPE;
-				
-				this._writeMultipoints();
 			}
 			
 			// Initialize the shapefile buffer
@@ -70,9 +84,9 @@
 			if (this._features.geometryType == 'esriGeometryPoint')
 				this._writePoints();
 			else if (this._features.geometryType == 'esriGeometryPolyline')
-				this._writePolylines();
+				this._writePolys('paths');
 			else if (this._features.geometryType == 'esriGeometryPolygon')
-				this._writePolygons();
+				this._writePolys('rings');
 			else if (this._features.geometryType == 'esriGeometryMultipoint')
 				this._writeMultipoints();
 				
@@ -90,10 +104,10 @@
 		save: function(filename) {
 			// Create the zip and add the necessary files to it
 			var zip = new JSZip("DEFLATE");
-			zip.add('jszip_test.shp', ShpJS.Base64Util.encodeBuffer(this._shpBuffer), {base64: true});
-			zip.add('jszip_test.shx', ShpJS.Base64Util.encodeBuffer(this._shxWriter._shxBuffer), {base64: true});
-			zip.add('jszip_test.dbf', ShpJS.Base64Util.encodeBuffer(this._dbfWriter._dbfBuffer), {base64: true});
-			zip.add('jszip_test.prj', ShpJS.WktStrings[this._features.spatialReference.wkid]);
+			zip.add(filename + '.shp', ShpJS.Base64Util.encodeBuffer(this._shpBuffer), {base64: true});
+			zip.add(filename + '.shx', ShpJS.Base64Util.encodeBuffer(this._shxWriter._shxBuffer), {base64: true});
+			zip.add(filename + '.dbf', ShpJS.Base64Util.encodeBuffer(this._dbfWriter._dbfBuffer), {base64: true});
+			zip.add(filename + '.prj', ShpJS.WktStrings[this._features.spatialReference.wkid]);
 			
 			// Generate the zip content as a binary string
 			var content = zip.generate(true);
@@ -108,7 +122,7 @@
 			var BB = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
 			var bb = new BB();
 			bb.append(ab);
-			saveAs(bb.getBlob('application/zip'), 'test.zip');
+			saveAs(bb.getBlob('application/zip'), filename + '.zip');
 		},
 		
 		/**
@@ -161,11 +175,11 @@
 		 * 
 		 */
 		_writePoints: function() {
-			var fs = this._features.features;		
-			var f = fs[0];
-			var g = f.geometry;
-			var bb = new esri.geometry.Extent(g.x, g.y, g.x, g.y, this._features.spatialReference);
-			var offset = 100;
+			var fs = this._features.features,
+				f = fs[0],
+				g = f.geometry,
+				bb = new esri.geometry.Extent(g.x, g.y, g.x, g.y, this._features.spatialReference),
+				offset = 100;
 			
 			// Loop through all points and write them to the dataview
 			for (var i=0; i<fs.length; i++) {
@@ -179,7 +193,7 @@
 				this._shpData.setInt32(offset+4, 10);
 				
 				// ShapeType, X/Y, all in little endian
-				this._shpData.setInt32(offset+8, ShpJS.Constants.POINT_SHAPE_TYPE, true);
+				this._shpData.setInt32(offset+8, this.shapeTypeCode, true);
 				this._shpData.setFloat64(offset+12, g.x, true);
 				this._shpData.setFloat64(offset+20, g.y, true);
 				
@@ -197,7 +211,6 @@
 				offset += 28;
 			}
 			
-			console.debug('bb: ', bb);
 			this.setExtent(bb);
 			this._shxWriter.setExtent(bb);
 		},
@@ -206,12 +219,110 @@
 			console.error('Writing multipoints not supported yet');
 		},
 		
-		_writePolylines: function() {
-			console.error('Writing polylines not supported yet');
-		},
-		
-		_writePolygons: function() {
-			console.error('Writing polygons not supported yet');
+		/**
+		 * Writes an array of polylines or polygons to the shapefile
+		 * 
+		 * Each polyline record is composed of a header plus contents.
+		 * 
+		 * Header:
+		 * 
+		 * Bytes        Type    Endian          Name
+		 * 0-3          int32   big                     Record Number (record numbers start at 1)
+		 * 4-8          int32   big                     Content Length
+		 * 
+		 * Contents:
+		 * 
+		 * Bytes        Type    Endian          Name
+		 * 0-3          int32   little          Shape Type (3 for polylines)
+		 * 4-35         double  little          Bounding box for the polyline
+		 * 36-39        int32   little          Total number of parts in the polyline
+		 * 40-43        int32   little          Total number of points for all parts
+		 * 44-n         double  little          Array of length NumParts.  Stores, for each polyline,
+		 *                                                              the index of its first point in the points array (0-based)
+		 * n-m          double  little          Array of length NumPoints, stores all the points for all
+		 *                                                              the parts.  Points for part 1 are the first X points,
+		 *                                                              followed by points for part 2, part 3, etc.             
+		 */		
+		_writePolys: function(partsName) {
+			var fs = this._features.features,
+				f = fs[0], // Feature
+				g = f.geometry, // Geometry
+				e = g.getExtent(), // Current geometry extent
+				p = g[partsName], // Paths
+				np = p.length, // Number of Parts
+				npt = 0, // Number of points
+				rl = 0, // Record length
+				bb = g.getExtent(), // Total shapefile extent
+				offset = 100; // Current offset
+			
+			// Loop through all polylines and write them to the dataview
+			for (var i=0; i<fs.length; i++) {
+				f = fs[i];
+				g = f.geometry;
+				e = g.getExtent();
+				p = g[partsName];
+				np = p.length;
+				
+				// Header - content length in 16-bit words
+				// 4 bytes for shape type, 32 bytes for bbox, 4 bytes for NumParts,
+				// 4 bytes for NumPoints, 4*NumParts bytes for Parts,
+				// 16*NumPoints bytes for Points 
+				npt = 0;
+				for (var j=0; j<np; j++)
+					npt += p[j].length;
+				
+				// Calculate the record length
+				rl = 4 + 32 + 4 + 4 + 4*np + 16*npt;
+				
+				// Add the record to SHX/DBF
+				this._shxWriter.addRecord(offset, rl);
+				this._dbfWriter.addRecord(f.attributes);
+				
+				// Header - record number
+				this._shpData.setInt32(offset, i+1);
+				// Divide by 2 to get len in 16-bit words
+				this._shpData.setInt32(offset+4, rl/2);
+				offset += 8; // 4 for record number, 4 for record length
+				
+				// Content = Shape Type
+				this._shpData.setInt32(offset, this.shapeTypeCode, true);
+				offset += 4;
+				
+				// Bounding box
+				this._shpData.setFloat64(offset, e.xmin, true);
+				this._shpData.setFloat64(offset+8, e.ymin, true);
+				this._shpData.setFloat64(offset+16, e.xmax, true);
+				this._shpData.setFloat64(offset+24, e.ymax, true);
+				offset += 32;
+				
+				// Number of parts/number of points
+				this._shpData.setInt32(offset, np, true);
+				this._shpData.setInt32(offset+4, npt, true);
+				offset += 8;
+				
+				// Write indices for all the parts
+				var partIdx = 0;
+				this._shpData.setInt32(offset, 0, true); // first index is 0
+				for (var j=1; j<np; j++) {
+					partIdx += j*p[j-1].length;
+					this._shpData.setInt32(offset + j*4, partIdx, true);
+				}
+				offset += np*4;
+
+				// Write out the points
+				for (var j=0; j<np; j++) {
+					for (var k=0; k<p[j].length; k++) {
+						this._shpData.setFloat64(offset, p[j][k][0], true);
+						this._shpData.setFloat64(offset+8, p[j][k][1], true);
+						offset += 16;
+					}
+				}
+				
+				bb = bb.union(e);
+			}
+			
+			this.setExtent(bb);
+			this._shxWriter.setExtent(bb);
 		},
 		
 		/**

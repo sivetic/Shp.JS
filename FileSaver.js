@@ -70,7 +70,6 @@ var saveAs = saveAs || (function(view) {
 		}
 		, FileSaver = function(blob, name) {
 			// First try a.download, then web filesystem, then object URLs
-			console.debug('blob.type: ', blob.type);
 			var
 				  filesaver = this
 				, type = blob.type

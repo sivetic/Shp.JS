@@ -81,7 +81,7 @@
 				// Increase the size of the record by field type size
 				// For strings, increase it by field length (string limit is 254 chars)
 				var ft = this.supportedFieldTypes[f.type];
-				this._recordSize += (ft.length > 0) ? ft.length : Math.min(f.length, 254);
+				this._recordSize += (ft.length > 0) ? ft.length : Math.min(f.length, ShpJS.Constants.MAX_STRING_LENGTH);
 			}
 			
 			var dbfSize = 32 + // 32 byte header
@@ -154,7 +154,7 @@
 			var dbfFNames = [];
 			var offset = 32; // Start writing information at 33rd byte
 			for (var i=0; i<this._fields.length; i++) {
-				f = this._fields[0];
+				f = this._fields[i];
 				if (!this._isFieldSupported(f))
 					continue;
 				
@@ -251,21 +251,49 @@
 		 * Writes a short/long integer (NO decimal places)
 		 */
 		_writeInteger: function(offset, value, length) {
+			if (value === undefined || value === null || isNaN(value)) {
+				this._pad(offset, length);
+				return;
+			}
+			
+			var strVal = '' + value;
+			this._pad(offset, length-strVal.length);
+			for (var i=0; i<strVal.length; i++)
+				this._dbfData.setInt8(offset+i, strVal.charCodeAt(i), true);
 		},
 		
 		/**
 		 * Writes a single/double value.
 		 */
 		_writeDecimal: function(offset, value, length, precision) {
+			if (value === undefined || value == null || isNaN(value)) {
+				this._pad(offset, length);
+				return;
+			}
+			
+			// Convert the number to exponential notation
+			// Number of fraction digits is the total length of the field
+			// minus the potential negative sign, minus 1 character for whole #,
+			// minus 1 character for the decimal place, 
+			// minus 5 characters for exponential notation (e+000)
+			var strVal = '' + value;
+			var fractionDigits = length-8;
+			if (fractionDigits > Math.abs(value).toString().length - (strVal.indexOf('.') > -1 ? 2 : 1))
+				fractionDigits = Math.abs(value).toString().length - (strVal.indexOf('.') > -1 ? 2 : 1);
+				
+			var eNotation = this._toScientific(value, Math.max(fractionDigits, 0));
+			
+			this._pad(length - eNotation.length);
+			for (var i=0; i<eNotation.length; i++)
+				this._dbfData.setInt8(offset+i, eNotation.charCodeAt(i), true);
 		},
 		
 		/**
-		 * Writes a string value.  Strings are limited to 255 characters.
+		 * Writes a string value.  Strings are limited to 254 characters.
 		 * If the supplied string is longer, it will be trimmed.
 		 */
 		_writeString: function(offset, value, length) {
-			if (length > ShpJS.Constants.MAX_STRING_LENGTH)
-				length = ShpJS.Constants.MAX_STRING_LENGTH;
+			length = Math.min(length, ShpJS.Constants.MAX_STRING_LENGTH);
 			
 			if (value == null) {
 				this._pad(length);
@@ -283,6 +311,18 @@
 		 * Writes a date to the DBF
 		 */
 		_writeDate: function(offset, value) {
+			if (value === undefined || value == null || isNaN(value)) {
+				this._pad(offset, length);
+				return;
+			}
+			
+			var dt = new Date(value);
+			var strMonth = (dt.getMonth()+1<10) ? '0' + (dt.getMonth()+1).toString() : dt.getMonth().toString();
+			var strDay = (dt.getDate()<10) ? '0' + dt.getDate().toString() : dt.getDate().toString();
+			var strDate = dt.getFullYear().toString() + strMonth + strDay;
+			// Write string out, one byte at a time
+			for (var i=0; i<strDate.length; i++)
+				this._dbfData.setInt8(offset+i, strDate.charCodeAt(i), true);
 		},
 		
 		/**
@@ -305,6 +345,74 @@
 		_pad: function(offset, length) {
 			for (var i=0; i<length; i++)
 				this._dbfData.setInt8(offset+i, ShpJS.Constants.PAD, true);
+		},
+		
+		/**
+		 * Convert any number to scientific notation with specified significant digits
+		 * eg .012345 -> 1.2345e-2 -- but 6.34e0 is displayed as 6.34
+		 */
+		_toScientific: function(value, sigDigits) {
+			var exponent = Math.floor(Math.log(Math.abs(value)) / Math.LN10);
+			if (value == 0) exponent = 0;
+			
+			// find mantissa (e.g. 3.47 is mantissa of 3470; need to divide by 1000)
+			var tenToPower = Math.pow(10, exponent);
+			var mantissa = value / tenToPower;
+			
+			// force significant digits in mantissa
+			// eg 3 sig digits 5 -> 5.00, 7.1 -> 7.10, 4.2791 -> 4.28
+			var output = this._formatDecimals(mantissa, sigDigits);
+			
+			if (exponent != 0) {
+				if (exponent < 10)
+					output += 'e+00' + exponent;
+				else if (exponent < 100)
+					output += 'e+0' + exponent;
+				else
+					output += 'e+' + exponent;
+			} else {
+				output += 'e+000';
+			}
+			
+			return output;
+		},
+		
+		/**
+		 * Format a number to the specified number of decmial places
+		 * Written by Robert Penner in May 2001 - www.robertpenner.com
+		 * Optimized by Ben Glazer - ben@blinkonce.com - on June 8, 2001
+		 * Optimized by Robert Penner on June 15, 2001
+		 */
+		_formatDecimals: function(num, digits) {
+			// If no decimal places needed, just use built-in Math.round
+			if (digits <= 0)
+				return Math.round(num).toString();
+				
+			// temporarily make number positive, for efficiency
+			var isNegative = false;
+			if (num < 0) {
+				isNegative = true;
+				num *= -1;
+			}
+			
+			// Round the number to specified decmial places
+			// e.g. 12.3456 to 3 digits (12.346) -> mult. by 1000, round, div. by 1000
+			var tenToPower = Math.pow(10, digits);
+			var cropped = Math.round(num*tenToPower).toString();
+			
+			// Prepend zeroes as appropriate for numbers between 0 and 1
+			if (num < 1)
+				while (cropped.length < digits+1)
+					cropped = '0' + cropped;
+			
+			// restore negative sign if necessary
+			if (isNegative)
+				cropped = '-' + cropped;
+				
+			// Insert decimal point in appropriate place (this has the same effect
+			// as dividing by tenToPower, but preserves trailing zeros)
+			var roundedNumStr = cropped.slice(0, -digits) + '.' + cropped.slice(-digits);
+			return roundedNumStr;
 		}
 	});
 	

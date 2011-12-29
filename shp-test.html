@@ -21,64 +21,18 @@
 	<script type="text/javascript" src="shx-writer.js"></script>
 	<script type="text/javascript" src="dbf-writer.js"></script>
 	<script type="text/javascript" src="wkt-strings.js"></script>	
+	<script type="text/javascript" src="test-data.js"></script>	
 </head>
 <body>
 	<button onclick="testShapefile();">Test Shapefile</button>
 
 	<script type="text/javascript">
-		var testData = new esri.tasks.FeatureSet({
-		  "displayFieldName" : "stop_name",
-		  "fieldAliases" : {
-			"stop_name" : "stop_name"
-		  },
-		  "geometryType" : "esriGeometryPoint",
-		  "spatialReference" : {
-			"wkid" : 102100
-		  },
-		  "fields" : [
-			{
-			  "name" : "stop_name",
-			  "type" : "esriFieldTypeString",
-			  "alias" : "stop_name",
-			  "length" : 254
-			}
-		  ],
-		  "features" : [
-			{
-			  "attributes" : {
-				"stop_name" : "Harkness Rapid Transit Station"
-			  },
-			  "geometry" : {
-				"x" : -10812790.798,
-				"y" : 6425952.9525000006
-			  }
-			},
-			{
-			  "attributes" : {
-				"stop_name" : "Osborne Rapid Transit Station"
-			  },
-			  "geometry" : {
-				"x" : -10813685.378900001,
-				"y" : 6424360.2399000004
-			  }
-			},
-			{
-			  "attributes" : {
-				"stop_name" : "Fort Rouge Rapid Transit Station"
-			  },
-			  "geometry" : {
-				"x" : -10814235.6315,
-				"y" : 6422418.7775000036
-			  }
-			}
-		  ]
-		});
-	
 		function testShapefile() {
 			var shpWriter = new ShpJS.ShpWriter();
-			console.debug('shpWriter: ', shpWriter);
-			shpWriter.write('foobar', testData);
-			shpWriter.save('test_shp.shp');
+			shpWriter.write(ShpJS.Data.points);
+			//shpWriter.write(ShpJS.Data.polylines);
+			//shpWriter.write(ShpJS.Data.polygons);
+			shpWriter.save('polylines');
 			//shpWriter.printShpContents();
 		}
 	</script>
