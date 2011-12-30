@@ -30,7 +30,6 @@
 		 */
 		write: function(featureSet) {			
 			this._features = featureSet;
-
 			
 			var len = this._features.features.length;
 						
@@ -67,6 +66,19 @@
 			}
 			else if (this._features.geometryType == 'esriGeometryMultipoint') {
 				this.shapeTypeCode = ShpJS.Constants.MULTIPOINT_SHAPE_TYPE;
+				
+				// 8 bytes for record header + 40 bytes for record contents (per record)
+				shpBufLen += len * (8 + 40);
+				
+				var g;
+				for (var i=0; i<len; i++) {
+					g = this._features.features[i].geometry;
+					
+					// 16 bytes per point
+					shpBufLen += g.points.length * 16;
+				}
+				
+				console.debug('shpBufLen: ', shpBufLen);
 			}
 			
 			// Initialize the shapefile buffer
@@ -215,8 +227,88 @@
 			this._shxWriter.setExtent(bb);
 		},
 		
+		/**
+		 * Writes an array of multipoints to the shapefile
+		 * 
+		 * Each multipoint record is composed of a header plus contents.
+		 * 
+		 * Header:
+		 * 
+		 * Bytes        Type    Endian          Name
+		 * 0-3          int32   big                     Record Number (record numbers start at 1)
+		 * 4-8          int32   big                     Content Length
+		 * 
+		 * Contents:
+		 * 
+		 * Bytes        Type    Endian          Name
+		 * 0-3          int32   little          Shape Type (8 for multipoints)
+		 * 4-35         double  little          Bounding box for the multipoint
+		 * 36-39        int32   little          Number of points contained by the geometry
+		 * 40-n         double  little          Array of length NumPoints.  Stores, all the points
+		 *                                                              contained by the multipoint (each point is composed
+		 *                                                              of an X and a Y value).
+		 * 
+		 * 
+		 */
 		_writeMultipoints: function() {
-			console.error('Writing multipoints not supported yet');
+			var fs = this._features.features,
+				f = fs[0],
+				g = f.geometry,
+				e = g.getExtent(),
+				pt = g.points,
+				npt = pt.length,
+				rl = 0,
+				bb = g.getExtent(),
+				offset = 100;
+				
+			// Loop through all the multipoints and write them to the dataview
+			for (var i=0; i<fs.length; i++) {
+				f = fs[i];
+				g = f.geometry;
+				e = g.getExtent();
+				pt = g.points;
+				npt = pt.length;
+				
+				// Calculate the record length: 4 bytes for shape type,
+				// 32 bytes for bounding box, 4 bytes for # pts, 16 bytes per point
+				rl = 4 + 32 + 4 + 16*npt;
+				
+				// Add the record to SHX/DBF
+				this._shxWriter.addRecord(offset, rl);
+				this._dbfWriter.addRecord(f.attributes);
+				
+				// Header - record number
+				this._shpData.setInt32(offset, i+1);
+				// Divide by 2 to get len in 16-bit words
+				this._shpData.setInt32(offset+4, rl/2);
+				offset += 8; // 4 for record number, 4 for record length
+				
+				// Content = Shape Type
+				this._shpData.setInt32(offset, this.shapeTypeCode, true);
+				offset += 4;
+				
+				// Bounding box
+				this._shpData.setFloat64(offset, e.xmin, true);
+				this._shpData.setFloat64(offset+8, e.ymin, true);
+				this._shpData.setFloat64(offset+16, e.xmax, true);
+				this._shpData.setFloat64(offset+24, e.ymax, true);
+				offset += 32;
+				
+				// Number of number of points
+				this._shpData.setInt32(offset, npt, true);
+				offset += 4;
+				
+				for (var j=0; j<npt; j++) {
+					this._shpData.setFloat64(offset, pt[j][0], true);
+					this._shpData.setFloat64(offset+8, pt[j][1], true);
+					offset += 16;
+				}
+				
+				bb = bb.union(e);
+			}
+				
+			this.setExtent(bb);
+			this._shxWriter.setExtent(bb);
 		},
 		
 		/**

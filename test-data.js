@@ -206,6 +206,168 @@ ShpJS.Data = function() {
 			}
 		  ]
 		}),
+		
+		multipoints: new esri.tasks.FeatureSet({
+		  "displayFieldName" : "OBJECTID",
+		  "fieldAliases" : {
+			"OBJECTID" : "OBJECTID",
+			"WorkOrderId" : "WorkOrderId",
+			"JobType" : "JobType",
+			"Description" : "Description",
+			"StartDate" : "StartDate",
+			"EndDate" : "EndDate",
+			"CreatedDate" : "CreatedDate",
+			"LastUpdated" : "LastUpdated",
+			"Status" : "Status",
+			"Creator" : "Creator",
+			"AssignedTo" : "AssignedTo",
+			"Department" : "Department",
+			"WORelateId" : "WORelateId"
+		  },
+		  "geometryType" : "esriGeometryMultipoint",
+		  "spatialReference" : {
+			"wkid" : 26914
+		  },
+		  "fields" : [
+			{
+			  "name" : "OBJECTID",
+			  "type" : "esriFieldTypeOID",
+			  "alias" : "OBJECTID"
+			},
+			{
+			  "name" : "WorkOrderId",
+			  "type" : "esriFieldTypeInteger",
+			  "alias" : "WorkOrderId"
+			},
+			{
+			  "name" : "JobType",
+			  "type" : "esriFieldTypeString",
+			  "alias" : "JobType",
+			  "length" : 128
+			},
+			{
+			  "name" : "Description",
+			  "type" : "esriFieldTypeString",
+			  "alias" : "Description",
+			  "length" : 1073741822
+			},
+			{
+			  "name" : "StartDate",
+			  "type" : "esriFieldTypeDate",
+			  "alias" : "StartDate",
+			  "length" : 36
+			},
+			{
+			  "name" : "EndDate",
+			  "type" : "esriFieldTypeDate",
+			  "alias" : "EndDate",
+			  "length" : 36
+			},
+			{
+			  "name" : "CreatedDate",
+			  "type" : "esriFieldTypeDate",
+			  "alias" : "CreatedDate",
+			  "length" : 36
+			},
+			{
+			  "name" : "LastUpdated",
+			  "type" : "esriFieldTypeDate",
+			  "alias" : "LastUpdated",
+			  "length" : 36
+			},
+			{
+			  "name" : "Status",
+			  "type" : "esriFieldTypeString",
+			  "alias" : "Status",
+			  "length" : 128
+			},
+			{
+			  "name" : "Creator",
+			  "type" : "esriFieldTypeString",
+			  "alias" : "Creator",
+			  "length" : 255
+			},
+			{
+			  "name" : "AssignedTo",
+			  "type" : "esriFieldTypeString",
+			  "alias" : "AssignedTo",
+			  "length" : 255
+			},
+			{
+			  "name" : "Department",
+			  "type" : "esriFieldTypeString",
+			  "alias" : "Department",
+			  "length" : 255
+			},
+			{
+			  "name" : "WORelateId",
+			  "type" : "esriFieldTypeInteger",
+			  "alias" : "WORelateId"
+			}
+		  ],
+		  "features" : [
+			{
+			  "attributes" : {
+				"OBJECTID" : 2,
+				"WorkOrderId" : 2,
+				"JobType" : "Road Issue",
+				"Description" : "Buckling",
+				"StartDate" : 1294725600000,
+				"EndDate" : 1295330400000,
+				"CreatedDate" : 1294937037000,
+				"LastUpdated" : 1294937037000,
+				"Status" : "InProgress",
+				"Creator" : "denns",
+				"AssignedTo" : "jplatt",
+				"Department" : "Public Works",
+				"WORelateId" : 8
+			  },
+			  "geometry" : {
+				"points" : [ [643416.86609201226, 5538612.7879397459 ], [ 641926.72977840435, 5540137.3201554809 ] , [ 641818.77956250496, 5540406.1373597812] ]
+			  }
+			},
+			{
+			  "attributes" : {
+				"OBJECTID" : 5,
+				"WorkOrderId" : 5,
+				"JobType" : "House Fire",
+				"Description" : "Residential Fire with extensive damage to surrounding areas.",
+				"StartDate" : null,
+				"EndDate" : null,
+				"CreatedDate" : 1294937528000,
+				"LastUpdated" : 1294937528000,
+				"Status" : "Completed",
+				"Creator" : "denns",
+				"AssignedTo" : "ajewell",
+				"Department" : "Fire",
+				"WORelateId" : 11
+			  },
+			  "geometry" : {
+				"points" : [ [ 641014.44462050218, 5539553.118987076 ], [ 642680.33616690896, 5537923.9565137476 ] ]
+			  }
+			},
+			{
+			  "attributes" : {
+				"OBJECTID" : 6,
+				"WorkOrderId" : 10,
+				"JobType" : "Road Repair",
+				"Description" : "Road and Curb damage during traffic accident.",
+				"StartDate" : 1296021600000,
+				"EndDate" : null,
+				"CreatedDate" : 1296075203000,
+				"LastUpdated" : 1296075203000,
+				"Status" : "New",
+				"Creator" : "stanway",
+				"AssignedTo" : "stanway",
+				"Department" : "Public Works",
+				"WORelateId" : 16
+			  },
+			  "geometry" : {
+				"points" : [ [ 642681.33616690896, 5537925.9565137476 ] ]
+			  }
+			}
+		  ]
+		}),
 
 		polylines: new esri.tasks.FeatureSet({
 		  "displayFieldName" : "StreetName",
