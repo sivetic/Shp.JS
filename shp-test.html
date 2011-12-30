@@ -29,10 +29,11 @@
 	<script type="text/javascript">
 		function testShapefile() {
 			var shpWriter = new ShpJS.ShpWriter();
-			shpWriter.write(ShpJS.Data.points);
+			//shpWriter.write(ShpJS.Data.points);
 			//shpWriter.write(ShpJS.Data.polylines);
 			//shpWriter.write(ShpJS.Data.polygons);
-			shpWriter.save('polylines');
+			shpWriter.write(ShpJS.Data.guid_points);
+			shpWriter.save('guid');
 			//shpWriter.printShpContents();
 		}
 	</script>

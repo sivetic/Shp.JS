@@ -17,7 +17,8 @@
 			esriFieldTypeSingle: { type: 'F', length: ShpJS.Constants.SINGLE_LENGTH, precision: ShpJS.Constants.SINGLE_PRECISION },
 			esriFieldTypeString: { type: 'C', length: -1, precision: 0 },
 			esriFieldTypeDate: { type: 'D', length: ShpJS.Constants.DATE_LENGTH, precision: 0 },
-			esriFieldTypeGUID: { type: 'C', length: ShpJS.Constants.GUID_LENGTH, precision: 0 }
+			esriFieldTypeGUID: { type: 'C', length: ShpJS.Constants.GUID_LENGTH, precision: 0 },
+			esriFieldTypeGlobalID: { type: 'C', length: ShpJS.Constants.GUID_LENGTH, precision: 0 }
 		};
 		
 		this.initialize.apply(this, arguments);
@@ -232,7 +233,7 @@
 					this._writeString(offset, a, f.length);
 				} else if (f.type == 'esriFieldTypeDate') {
 					this._writeDate(offset, a);
-				} else if (f.type == 'esriFieldTypeGuid') {
+				} else if (f.type == 'esriFieldTypeGuid' || f.type == 'esriFieldTypeGlobalID') {
 					this._writeGuid(offset, a);
 				}
 				
@@ -243,8 +244,7 @@
 		},
 		
 		finishDbf: function() {
-			var offset = 32 + 32*this._fields.length + this._recIdx*this._recordSize + 1;
-			this._dbfData.setInt8(offset, ShpJS.Constants.EOF_TERMINATOR, true);
+			this._dbfData.setInt8(this._dbfBuffer.byteLength-1, ShpJS.Constants.EOF_TERMINATOR, true);
 		},
 		
 		/**
@@ -329,6 +329,13 @@
 		 * Writes a guid to the DBF
 		 */
 		_writeGuid: function(offset, value) {
+			if (value === undefined || value == null) {
+				this._pad(offset, length);
+				return;
+			}
+			
+			for (var i=0; i<strDate.length; i++)
+				this._dbfData.setInt8(offset+i, strDate.charCodeAt(i), true);
 		},
 		
 		/**
