@@ -334,8 +334,8 @@
 				return;
 			}
 			
-			for (var i=0; i<strDate.length; i++)
-				this._dbfData.setInt8(offset+i, strDate.charCodeAt(i), true);
+			for (var i=0; i<value.length; i++)
+				this._dbfData.setInt8(offset+i, value.charCodeAt(i), true);
 		},
 		
 		/**

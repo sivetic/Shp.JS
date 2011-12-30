@@ -77,8 +77,6 @@
 					// 16 bytes per point
 					shpBufLen += g.points.length * 16;
 				}
-				
-				console.debug('shpBufLen: ', shpBufLen);
 			}
 			
 			// Initialize the shapefile buffer
