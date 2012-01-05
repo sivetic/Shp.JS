@@ -327,7 +327,7 @@
 		 * 4-35         double  little          Bounding box for the polyline
 		 * 36-39        int32   little          Total number of parts in the polyline
 		 * 40-43        int32   little          Total number of points for all parts
-		 * 44-n         double  little          Array of length NumParts.  Stores, for each polyline,
+		 * 44-n         int32  little          Array of length NumParts.  Stores, for each polyline,
 		 *                                                              the index of its first point in the points array (0-based)
 		 * n-m          double  little          Array of length NumPoints, stores all the points for all
 		 *                                                              the parts.  Points for part 1 are the first X points,

@@ -96,6 +96,12 @@ ShpJS.Data = function() {
 			  "name" : "WORelateId",
 			  "type" : "esriFieldTypeInteger",
 			  "alias" : "WORelateId"
+			},
+			{
+			  "name" : "GlobalID",
+			  "type" : "esriFieldTypeGlobalID",
+			  "alias" : "GlobalID",
+			  "length" : 38
 			}
 		  ],
 		  "features" : [
@@ -113,7 +119,8 @@ ShpJS.Data = function() {
 				"Creator" : "denns",
 				"AssignedTo" : "jplatt",
 				"Department" : "Public Works",
-				"WORelateId" : 8
+				"WORelateId" : 8,
+				"GlobalID" : "{6B044BED-27DE-42EE-9C35-B1C481610B9C}"
 			  },
 			  "geometry" : {
 				"x" : 643416.86609201226,
@@ -134,7 +141,8 @@ ShpJS.Data = function() {
 				"Creator" : "denns",
 				"AssignedTo" : "ccampbell",
 				"Department" : "Planning",
-				"WORelateId" : 9
+				"WORelateId" : 9,
+				"GlobalID" : "{F7952AD1-DC6C-41A7-8E39-4EB4A20732A2}"
 			  },
 			  "geometry" : {
 				"x" : 641926.72977840435,
@@ -155,7 +163,8 @@ ShpJS.Data = function() {
 				"Creator" : "denns",
 				"AssignedTo" : "ben",
 				"Department" : "Planning",
-				"WORelateId" : 10
+				"WORelateId" : 10,
+				"GlobalID" : "{8BD153DE-8369-43B0-A15B-A3A35B0D4B67}"
 			  },
 			  "geometry" : {
 				"x" : 641818.77956250496,
@@ -176,7 +185,8 @@ ShpJS.Data = function() {
 				"Creator" : "denns",
 				"AssignedTo" : "ajewell",
 				"Department" : "Fire",
-				"WORelateId" : 11
+				"WORelateId" : 11,
+				"GlobalID" : "{AF80C2AF-4A3F-4394-8E87-9225642C1F1A}"
 			  },
 			  "geometry" : {
 				"x" : 641014.44462050218,
@@ -197,7 +207,8 @@ ShpJS.Data = function() {
 				"Creator" : "stanway",
 				"AssignedTo" : "stanway",
 				"Department" : "Public Works",
-				"WORelateId" : 16
+				"WORelateId" : 16,
+				"GlobalID" : "{3AB723BA-1B9D-4118-90B8-C239E2FBD45E}"
 			  },
 			  "geometry" : {
 				"x" : 642680.33616690896,
@@ -1100,256 +1111,7 @@ ShpJS.Data = function() {
 			  }
 			}
 		  ]
-		}),
-		
-		guid_points: new esri.tasks.FeatureSet({
-		  "displayFieldName" : "FacilityID",
-		  "fieldAliases" : {
-			"OBJECTID" : "OBJECTID",
-			"FACILITYID" : "Facility Identifier",
-			"FACILITYNAME" : "Facility Name",
-			"LARGEMETER" : "Large Meter Flag",
-			"INSTALLDATE" : "Install Date",
-			"LOCDESC" : "Location Description",
-			"ROTATION" : "Rotation",
-			"ACCOUNTID" : "Account Identifier",
-			"LOCATIONID" : "Location Identifier",
-			"CRITICAL" : "Critical Customer",
-			"ENABLED" : "Enabled",
-			"ACTIVEFLAG" : "Active Flag",
-			"OWNEDBY" : "Owned By",
-			"MAINTBY" : "Managed By",
-			"LASTUPDATE" : "Last Update Date",
-			"LASTEDITOR" : "Last Editor",
-			"GlobalID" : "GlobalID"
-		  },
-		  "geometryType" : "esriGeometryPoint",
-		  "spatialReference" : {
-			"wkid" : 2236
-		  },
-		  "fields" : [
-			{
-			  "name" : "OBJECTID",
-			  "type" : "esriFieldTypeOID",
-			  "alias" : "OBJECTID"
-			},
-			{
-			  "name" : "FACILITYID",
-			  "type" : "esriFieldTypeString",
-			  "alias" : "Facility Identifier",
-			  "length" : 20
-			},
-			{
-			  "name" : "FACILITYNAME",
-			  "type" : "esriFieldTypeString",
-			  "alias" : "Facility Name",
-			  "length" : 100
-			},
-			{
-			  "name" : "LARGEMETER",
-			  "type" : "esriFieldTypeSmallInteger",
-			  "alias" : "Large Meter Flag"
-			},
-			{
-			  "name" : "INSTALLDATE",
-			  "type" : "esriFieldTypeDate",
-			  "alias" : "Install Date",
-			  "length" : 8
-			},
-			{
-			  "name" : "LOCDESC",
-			  "type" : "esriFieldTypeString",
-			  "alias" : "Location Description",
-			  "length" : 200
-			},
-			{
-			  "name" : "ROTATION",
-			  "type" : "esriFieldTypeDouble",
-			  "alias" : "Rotation"
-			},
-			{
-			  "name" : "ACCOUNTID",
-			  "type" : "esriFieldTypeString",
-			  "alias" : "Account Identifier",
-			  "length" : 20
-			},
-			{
-			  "name" : "LOCATIONID",
-			  "type" : "esriFieldTypeString",
-			  "alias" : "Location Identifier",
-			  "length" : 20
-			},
-			{
-			  "name" : "CRITICAL",
-			  "type" : "esriFieldTypeSmallInteger",
-			  "alias" : "Critical Customer"
-			},
-			{
-			  "name" : "ENABLED",
-			  "type" : "esriFieldTypeSmallInteger",
-			  "alias" : "Enabled"
-			},
-			{
-			  "name" : "ACTIVEFLAG",
-			  "type" : "esriFieldTypeSmallInteger",
-			  "alias" : "Active Flag"
-			},
-			{
-			  "name" : "OWNEDBY",
-			  "type" : "esriFieldTypeSmallInteger",
-			  "alias" : "Owned By"
-			},
-			{
-			  "name" : "MAINTBY",
-			  "type" : "esriFieldTypeSmallInteger",
-			  "alias" : "Managed By"
-			},
-			{
-			  "name" : "LASTUPDATE",
-			  "type" : "esriFieldTypeDate",
-			  "alias" : "Last Update Date",
-			  "length" : 8
-			},
-			{
-			  "name" : "LASTEDITOR",
-			  "type" : "esriFieldTypeString",
-			  "alias" : "Last Editor",
-			  "length" : 50
-			},
-			{
-			  "name" : "GlobalID",
-			  "type" : "esriFieldTypeGlobalID",
-			  "alias" : "GlobalID",
-			  "length" : 38
-			}
-		  ],
-		  "features" : [
-			{
-			  "attributes" : {
-				"OBJECTID" : 312,
-				"FACILITYID" : "1753",
-				"FACILITYNAME" : "Water Meter",
-				"LARGEMETER" : 0,
-				"INSTALLDATE" : null,
-				"LOCDESC" : null,
-				"ROTATION" : 0,
-				"ACCOUNTID" : "10489",
-				"LOCATIONID" : "10489",
-				"CRITICAL" : 0,
-				"ENABLED" : 1,
-				"ACTIVEFLAG" : 1,
-				"OWNEDBY" : 1,
-				"MAINTBY" : 1,
-				"LASTUPDATE" : 1231286400000,
-				"LASTEDITOR" : "DataLoad",
-				"GlobalID" : "{3AB723BA-1B9D-4118-90B8-C239E2FBD45E}"
-			  },
-			  "geometry" : {
-				"x" : 867359.16653092951,
-				"y" : 1133698.3389419466
-			  }
-			},
-			{
-			  "attributes" : {
-				"OBJECTID" : 313,
-				"FACILITYID" : "1754",
-				"FACILITYNAME" : "Water Meter",
-				"LARGEMETER" : 0,
-				"INSTALLDATE" : null,
-				"LOCDESC" : null,
-				"ROTATION" : 0,
-				"ACCOUNTID" : "10490",
-				"LOCATIONID" : "10490",
-				"CRITICAL" : 0,
-				"ENABLED" : 1,
-				"ACTIVEFLAG" : 1,
-				"OWNEDBY" : 1,
-				"MAINTBY" : 1,
-				"LASTUPDATE" : 1231286400000,
-				"LASTEDITOR" : "DataLoad",
-				"GlobalID" : "{AF80C2AF-4A3F-4394-8E87-9225642C1F1A}"
-			  },
-			  "geometry" : {
-				"x" : 867360.2311613448,
-				"y" : 1133406.341494441
-			  }
-			},
-			{
-			  "attributes" : {
-				"OBJECTID" : 314,
-				"FACILITYID" : "1755",
-				"FACILITYNAME" : "Water Meter",
-				"LARGEMETER" : 0,
-				"INSTALLDATE" : null,
-				"LOCDESC" : null,
-				"ROTATION" : 0,
-				"ACCOUNTID" : "10491",
-				"LOCATIONID" : "10491",
-				"CRITICAL" : 0,
-				"ENABLED" : 1,
-				"ACTIVEFLAG" : 1,
-				"OWNEDBY" : 1,
-				"MAINTBY" : 1,
-				"LASTUPDATE" : 1231286400000,
-				"LASTEDITOR" : "DataLoad",
-				"GlobalID" : "{8BD153DE-8369-43B0-A15B-A3A35B0D4B67}"
-			  },
-			  "geometry" : {
-				"x" : 867310.26472584531,
-				"y" : 1133397.0301613584
-			  }
-			},
-			{
-			  "attributes" : {
-				"OBJECTID" : 315,
-				"FACILITYID" : "1756",
-				"FACILITYNAME" : "Water Meter",
-				"LARGEMETER" : 0,
-				"INSTALLDATE" : null,
-				"LOCDESC" : null,
-				"ROTATION" : 0,
-				"ACCOUNTID" : "10492",
-				"LOCATIONID" : "10492",
-				"CRITICAL" : 0,
-				"ENABLED" : 1,
-				"ACTIVEFLAG" : 1,
-				"OWNEDBY" : 1,
-				"MAINTBY" : 1,
-				"LASTUPDATE" : 1231286400000,
-				"LASTEDITOR" : "DataLoad",
-				"GlobalID" : "{F7952AD1-DC6C-41A7-8E39-4EB4A20732A2}"
-			  },
-			  "geometry" : {
-				"x" : 867310.86839918047,
-				"y" : 1133232.2181550264
-			  }
-			},
-			{
-			  "attributes" : {
-				"OBJECTID" : 316,
-				"FACILITYID" : "1757",
-				"FACILITYNAME" : "Water Meter",
-				"LARGEMETER" : 0,
-				"INSTALLDATE" : null,
-				"LOCDESC" : null,
-				"ROTATION" : 0,
-				"ACCOUNTID" : "10493",
-				"LOCATIONID" : "10493",
-				"CRITICAL" : 0,
-				"ENABLED" : 1,
-				"ACTIVEFLAG" : 1,
-				"OWNEDBY" : 1,
-				"MAINTBY" : 1,
-				"LASTUPDATE" : 1231286400000,
-				"LASTEDITOR" : "DataLoad",
-				"GlobalID" : "{6B044BED-27DE-42EE-9C35-B1C481610B9C}"
-			  },
-			  "geometry" : {
-				"x" : 867311.01013118029,
-				"y" : 1133193.4383769482
-			  }
-			}
-		  ]
 		})
+		
 	};
 }();
