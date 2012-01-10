@@ -24,7 +24,6 @@
 		 * Reads features from the supplied content string
 		 */
 		read: function(content) {
-			console.debug('this: ', this);
 			// Read the content string into an array buffer
 			this._shxBuffer = new ArrayBuffer(content.length);
 			this._shxData = new DataView(this._shxBuffer);

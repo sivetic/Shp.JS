@@ -94,12 +94,12 @@
 			this._dbfData = new DataView(this._dbfBuffer);
 			
 			// Version Information
-			this._dbfData.setInt8(0, 0x3, true);
+			this._dbfData.setUint8(0, 0x3, true);
 			// Date of last updated in YYMMDD
 			var dt = new Date();
-			this._dbfData.setInt8(1, dt.getFullYear() - ShpJS.Constants.START_YEAR, true);
-			this._dbfData.setInt8(2, dt.getMonth()+1, true);
-			this._dbfData.setInt8(3, dt.getDate(), true);
+			this._dbfData.setUint8(1, dt.getFullYear() - ShpJS.Constants.START_YEAR, true);
+			this._dbfData.setUint8(2, dt.getMonth()+1, true);
+			this._dbfData.setUint8(3, dt.getDate(), true);
 			// Number of records in the table
 			this._dbfData.setInt32(4, this._numFeats, true);
 			// Number of bytes in the header (32 header + 32 per field + 1 terminator)
@@ -109,16 +109,16 @@
 			// Reserved (2 bytes)
 			this._dbfData.setInt16(12, 0x0, true);
 			// dBASE IV transaction
-			this._dbfData.setInt8(14, 0x0, true);
+			this._dbfData.setUint8(14, 0x0, true);
 			// dBASE IV encryption flag
-			this._dbfData.setInt8(15, 0x0, true);
+			this._dbfData.setUint8(15, 0x0, true);
 			// 12 bytes for multi-user (0s)
 			this._dbfData.setFloat64(16, 0x0, true);
 			this._dbfData.setInt32(24, 0x0, true);
 			// 1 byte for MDX flag
-			this._dbfData.setInt8(28, 0x0, true);
+			this._dbfData.setUint8(28, 0x0, true);
 			// Language driver ID
-			this._dbfData.setInt8(29, ShpJS.Constants.LANGUAGE_DRIVER_ID, true);
+			this._dbfData.setUint8(29, ShpJS.Constants.LANGUAGE_DRIVER_ID, true);
 			// Reserved (2 bytes)
 			this._dbfData.setInt16(30, 0x0, true);
 			
@@ -178,29 +178,29 @@
 				// Field name, padded with 0s at the end
 				for (var j=0; j<ShpJS.Constants.MAX_FIELD_NAME_LENGTH; j++) {
 					if (fn.length > j)
-						this._dbfData.setInt8(offset++, fn.charCodeAt(j), true);
+						this._dbfData.setUint8(offset++, fn.charCodeAt(j), true);
 					else
-						this._dbfData.setInt8(offset++, 0x0, true); // pad with 0s
+						this._dbfData.setUint8(offset++, 0x0, true); // pad with 0s
 				}
-				this._dbfData.setInt8(offset++, 0x0, true);
+				this._dbfData.setUint8(offset++, 0x0, true);
 				
 				// Write the field information based on type
 				ft = this.supportedFieldTypes[f.type];
-				this._dbfData.setInt8(offset++, ft.type.charCodeAt(0), true); // Data type
+				this._dbfData.setUint8(offset++, ft.type.charCodeAt(0), true); // Data type
 				this._dbfData.setInt32(offset, 0x0, true); // Data address - null
 				offset += 4;
 				// Field length, grab from actual field in case of strings
-				this._dbfData.setInt8(offset++, ft.length > -1 ? ft.length : Math.min(f.length, ShpJS.Constants.MAX_STRING_LENGTH), true);
-				this._dbfData.setInt8(offset++, ft.precision, true); // Precision
+				this._dbfData.setUint8(offset++, ft.length > -1 ? ft.length : Math.min(f.length, ShpJS.Constants.MAX_STRING_LENGTH), true);
+				this._dbfData.setUint8(offset++, ft.precision, true); // Precision
 				
 				// 14 reserved bytes
 				for (var j=0; j<7; j++)
 					this._dbfData.setInt16(offset+j*2, 0x0, true);
 				offset += 14;
-				
-				// Header terminator
-				this._dbfData.setInt8(offset, ShpJS.Constants.HEADER_TERMINATOR, true);
 			}
+			
+			// Header terminator
+			this._dbfData.setUint8(offset, ShpJS.Constants.HEADER_TERMINATOR, true);
 		},
 		
 		/**
@@ -211,7 +211,7 @@
 			var offset = 32 + 32*this._fields.length + this._recIdx*this._recordSize + 1;
 			
 			// Deleted flag - record OK
-			this._dbfData.setInt8(offset, ShpJS.Constants.PAD, true);
+			this._dbfData.setUint8(offset, ShpJS.Constants.PAD, true);
 			offset++;
 			
 			for (var i=0; i<this._fields.length; i++) {
@@ -244,7 +244,7 @@
 		},
 		
 		finishDbf: function() {
-			this._dbfData.setInt8(this._dbfBuffer.byteLength-1, ShpJS.Constants.EOF_TERMINATOR, true);
+			this._dbfData.setUint8(this._dbfBuffer.byteLength-1, ShpJS.Constants.EOF_TERMINATOR, true);
 		},
 		
 		/**
@@ -259,7 +259,7 @@
 			var strVal = '' + value;
 			this._pad(offset, length-strVal.length);
 			for (var i=0; i<strVal.length; i++)
-				this._dbfData.setInt8(offset+i, strVal.charCodeAt(i), true);
+				this._dbfData.setUint8(offset+i, strVal.charCodeAt(i), true);
 		},
 		
 		/**
@@ -285,7 +285,7 @@
 			
 			this._pad(length - eNotation.length);
 			for (var i=0; i<eNotation.length; i++)
-				this._dbfData.setInt8(offset+i, eNotation.charCodeAt(i), true);
+				this._dbfData.setUint8(offset+i, eNotation.charCodeAt(i), true);
 		},
 		
 		/**
@@ -302,7 +302,7 @@
 				value = value.substr(0, ShpJS.Constants.MAX_STRING_LENGTH);
 				// Write string out, one byte at a time
 				for (var i=0; i<value.length; i++)
-					this._dbfData.setInt8(offset+i, value.charCodeAt(i), true);
+					this._dbfData.setUint8(offset+i, value.charCodeAt(i), true);
 				this._pad(offset+value.length, length-value.length);
 			}
 		},
@@ -322,7 +322,7 @@
 			var strDate = dt.getFullYear().toString() + strMonth + strDay;
 			// Write string out, one byte at a time
 			for (var i=0; i<strDate.length; i++)
-				this._dbfData.setInt8(offset+i, strDate.charCodeAt(i), true);
+				this._dbfData.setUint8(offset+i, strDate.charCodeAt(i), true);
 		},
 		
 		/**
@@ -335,7 +335,7 @@
 			}
 			
 			for (var i=0; i<value.length; i++)
-				this._dbfData.setInt8(offset+i, value.charCodeAt(i), true);
+				this._dbfData.setUint8(offset+i, value.charCodeAt(i), true);
 		},
 		
 		/**
@@ -351,7 +351,7 @@
 		 */
 		_pad: function(offset, length) {
 			for (var i=0; i<length; i++)
-				this._dbfData.setInt8(offset+i, ShpJS.Constants.PAD, true);
+				this._dbfData.setUint8(offset+i, ShpJS.Constants.PAD, true);
 		},
 		
 		/**

@@ -15,6 +15,9 @@
 		_shpBuffer: null,
 		_shpData: null,
 		
+		_shxReader: null,
+		_dbfReader: null,
+		
 		_features: null,
 		
 		onparsecomplete: null,
@@ -76,12 +79,15 @@
 				for (var i=0; i<content.length; i++)
 					scope._shpData.setUint8(i, content.charCodeAt(i));
 					
-				// Create the SHX/DBF readers
+				// Create the SHX reader, required to parse the SHP
 				scope._shxReader = new ShpJS.ShxReader();
 				scope._shxReader.read.call(scope._shxReader, scope._zipFile.extract(fShx.filename));
+				
+				// Create the DBF reader, and parse the DBF
 				scope._dbfReader = new ShpJS.DbfReader();
 				scope._dbfReader.read.call(scope._dbfReader, scope._zipFile.extract(fDbf.filename));
 				
+				// Parse the SHP
 				scope._parse.call(scope);
 				
 				// Call the event handler, if one is present
@@ -115,18 +121,28 @@
 				if (this._shpData.getInt32(fidx+8, true) != this.shapeTypeCode) {
 					// TODO: Throw error here
 					console.error('Shape type mismatch, aborting parse!');
+					this._features = null;
+					return;
 				}
 				
 				// Advance the offset to skip record #, content length, and shape type
 				fidx += 12;
+				var g;
 				if (this.shapeTypeCode == ShpJS.Constants.POINT_SHAPE_TYPE)
-					this._features.features.push(this._parsePoint(fidx));
+					g = this._parsePoint(fidx);
 				else if (this.shapeTypeCode == ShpJS.Constants.MULTIPOINT_SHAPE_TYPE)
-					this._features.features.push(this._parseMultipoint(fidx));
+					g = this._parseMultipoint(fidx);
 				else if (this.shapeTypeCode == ShpJS.Constants.POLYLINE_SHAPE_TYPE)
-					this._features.features.push(this._parsePolyline(fidx));
+					g = this._parsePolyline(fidx);
 				else if (this.shapeTypeCode == ShpJS.Constants.POLYGON_SHAPE_TYPE)
-					this._features.features.push(this._parsePolygon(fidx));
+					g = this._parsePolygon(fidx);
+				
+				// Get the attributes from DBF
+				var attrs = this._dbfReader.getAttributes(i);
+				
+				// Create the Graphics object and push into features array
+				var gfx = new esri.Graphic(g, null, attrs, null);
+				this._features.features.push(gfx);
 			}
 			
 			console.debug('features parsed: ', this._features);
