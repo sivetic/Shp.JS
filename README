@@ -1,8 +1,7 @@
 Shp.JS is a JavaScript library used for reading and writing Shapefiles. More
 info to follow.  Library is in its infancy, and contains numerous bugs/missing
-features.
-
-Library currently only supports writing, reading support is planned for future.
+features.  Library currently supports both reading and writing support, with
+the exception of reading the projection file.
 
 Library utilizes the ESRI JavaScript API, though de-coupling of the library
 from the ESRI API is possible/planned.
