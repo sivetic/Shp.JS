@@ -18,6 +18,7 @@
 		_shxReader: null,
 		_dbfReader: null,
 		
+		_wkid: null,
 		_features: null,
 		
 		onparsecomplete: null,
@@ -50,7 +51,8 @@
 				// Find indices of shp/shx/dbf files
 				var shpIdx = -1,
 					shxIdx = -1,
-					dbfIdx = -1;
+					dbfIdx = -1,
+					prjIdx = -1;
 					
 				for (var idx=0; idx<scope._zipFile.filelist.length; idx++) {
 					var fname = scope._zipFile.filelist[idx].filename;
@@ -60,9 +62,11 @@
 						shxIdx = idx;
 					else if (fname.match(/\.dbf$/))
 						dbfIdx = idx;
+					else if (fname.match(/\.prj$/))
+						prjIdx = idx;
 				}
 
-				if (shpIdx === -1 || shxIdx === -1 || dbfIdx === -1) {
+				if (shpIdx === -1 || shxIdx === -1 || dbfIdx === -1 || prjIdx === -1) {
 					console.error('Could not find one or more required files');
 					return;
 				}
@@ -71,6 +75,7 @@
 				var fShp = scope._zipFile.filelist[shpIdx];
 				var fShx = scope._zipFile.filelist[shxIdx];
 				var fDbf = scope._zipFile.filelist[dbfIdx];
+				var fPrj = scope._zipFile.filelist[prjIdx];
 				
 				// Convert the string into an array buffer
 				var content = scope._zipFile.extract(fShp.filename);
@@ -86,6 +91,10 @@
 				// Create the DBF reader, and parse the DBF
 				scope._dbfReader = new ShpJS.DbfReader();
 				scope._dbfReader.read.call(scope._dbfReader, scope._zipFile.extract(fDbf.filename));
+				
+				// Create the PRJ reader, and parse the PRJ
+				scope._wkid = ShpJS.PrjReader.prjToWkid(scope._zipFile.extract(fPrj.filename));
+				console.debug('WKID: ', scope._wkid);
 				
 				// Parse the SHP
 				scope._parse.call(scope);
@@ -151,13 +160,14 @@
 		_parsePoint: function(idx) {
 			return new esri.geometry.Point(
 				this._shpData.getFloat64(idx, true),
-				this._shpData.getFloat64(idx+8, true)
+				this._shpData.getFloat64(idx+8, true),
+				this._wkid
 			);
 		},
 		
 		_parseMultipoint: function(idx) {
 			var nump = this._shpData.getInt32(idx+32, true);
-			var mp = new esri.geometry.Multipoint();
+			var mp = new esri.geometry.Multipoint(this._wkid);
 			
 			idx+=36;
 			for (var i=0; i<nump; i++) {
@@ -180,7 +190,7 @@
 				idx += 4;
 			}
 			
-			var pline = new esri.geometry.Polyline();
+			var pline = new esri.geometry.Polyline(this._wkid);
 			
 			// Read the points for each individual part
 			for (var i=0; i<numpaths; i++) {
@@ -217,7 +227,7 @@
 				idx += 4;
 			}
 			
-			var pgon = new esri.geometry.Polygon();
+			var pgon = new esri.geometry.Polygon(this._wkid);
 			
 			// Read the points for each individual part
 			for (var i=0; i<numrings; i++) {
